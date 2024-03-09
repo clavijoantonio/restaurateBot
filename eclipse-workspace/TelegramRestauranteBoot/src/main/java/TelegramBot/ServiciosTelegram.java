@@ -44,8 +44,9 @@ import com.Alexandra.TelegramRestauranteBoot.Service.TomaPedidoService;
 import com.Alexandra.TelegramRestauranteBoot.Service.informacionService;
 
 public class ServiciosTelegram extends TelegramLongPollingBot{
-	
-	
+	double valorTotal;
+	double valorUnitario;
+	String valor2;
 	String producto;
 	String cantidad;
 	long id_informacion;
@@ -525,7 +526,11 @@ public void etapa4() {
   			}
            }else if(cantidad!=null) {
         	   cantidad=mensage.getText();
+        	   valorUnitario=Integer.parseInt(valor2);
+        	   valorTotal=valorUnitario*Integer.parseInt(cantidad);
         	   objPedido.put("cantidad",mensage.getText());
+        	   objPedido.put("valor_unitario",valorUnitario);
+        	   objPedido.put("valor_total",valorTotal);
         	   textoOpcionPedido = "INGRESA UNA OPCION "+ "\n"+"\n1.-Agregar otro producto\n2.-Agregar datos de envio";;
         	 //ESCRIBIMOS EL MENSAJE
            	message.setText(textoOpcionPedido);
@@ -763,6 +768,7 @@ private void leemosDatos() {
 		    for(Object obj:jsonArray  ) {
 		    	registroPedido.add(((JSONObject) obj).getLong("id_producto"));
 		    	registroPedido.add(((JSONObject) obj).getString("producto"));
+		    	registroPedido.add(((JSONObject) obj).getInt("precio"));
 		    	System.out.println(registroPedido);
 		    	 
 		    	 registrosMenuPedido.add(registroPedido);
@@ -779,18 +785,28 @@ private void leemosDatos() {
   public void leerRegistroMenuPedido() {
 	  int cont=0;
       int cont2=1;
+      int cont3=2;
       String idProducto;
       String producto;
 	  for(ArrayList<Object> menu:registrosMenuPedido ) {
-			
+		  
+		 
+		  
     	    if (cont<=menu.size() && cont2<=menu.size()) {
-    		idProducto=  menu.get(cont).toString();
-    	
-    		cont+=2;
+    		
+    	    
+    	    
+    	    idProducto=  menu.get(cont).toString();
+    	    
+    		cont+=3;
             producto= menu.get(cont2).toString();
 			
-            cont2+=2;
-			
+            cont2+=3;
+            
+            valor2=menu.get(cont3).toString();
+            
+            cont3+=3;
+            
             textoMenuPedido = textoMenuPedido + idProducto + ".-" + producto + "\n";
            
     	 }
