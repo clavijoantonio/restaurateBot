@@ -44,6 +44,10 @@ import com.Alexandra.TelegramRestauranteBoot.Service.TomaPedidoService;
 import com.Alexandra.TelegramRestauranteBoot.Service.informacionService;
 
 public class ServiciosTelegram extends TelegramLongPollingBot{
+	int opcionEtp6;
+	envioDatos Datos;
+	Update update=null;
+	long id_pedido=0;
 	double valorTotal;
 	double valorUnitario;
 	String valor2;
@@ -71,6 +75,7 @@ public class ServiciosTelegram extends TelegramLongPollingBot{
     ArrayList registroPedido = new ArrayList<>();
     JSONArray DatosPedido=new JSONArray();
     JSONObject objPedido=new JSONObject();
+    JSONObject DatosCliente=new JSONObject();
     HttpURLConnection  conn;
    
    TomaPedidoService pedidoService= new TomaPedidoService();
@@ -202,7 +207,12 @@ public void revisionTel() {
         etapa5();
         return;
     }
-    
+    if (etapa[usuarioSel] == 6) {
+        //VALIDAMOS QUE SI SEA UN NUMERO DEL SORTEO Y PREGUNTAMOS SI QUIERE UN NUMERO AL AZAR Y QUIERE SELECCIONAR SU NUMERO
+        //SI NO LLAMAMOS LA ETAPA 2 PARA QUE ENVIE POR WA LOS SORTEOS
+        etapa6();
+        return;
+    }
                         
     } catch (TelegramApiException e) {
         e.printStackTrace();
@@ -586,8 +596,13 @@ public void etapa5() {
 			   return;
 		   }
            if (opcion==2) {
-    	  System.out.println("elegi dos");
-    	   
+        	   
+        	   
+        	 DatosTomaPedido(mensage);
+     	     Datos= envioDatos.DIRECCION;
+        	 opcionEtp6=0;
+    	     etapa6();
+    	     return;
             }
        String	 textoenviopedio = "datos envio "+ "\n";
        //ESCRIBIMOS EL MENSAJE
@@ -634,6 +649,122 @@ public void etapa5() {
          
        }
    
+}
+public void etapa6() {
+	 //VARIABLE QUE RECIBE LAS OPCIONES COLOCADAS POR EL USUARIO DE WA
+ 
+ 
+  //QUITAMOS ESPACIOS EN BLANCO
+  String mensajesRecibidosSinEspacios = mensajesRecibidos[usuarioSel];
+     
+     
+     System.out.println( DatosCliente.toString());
+    
+    	 if(opcionEtp6==0) {
+		 
+         opcionEtp6+=1;
+         System.out.println( opcionEtp6);
+		 TomaDatosCliente(Datos);
+		 
+		 
+	     }else if(opcionEtp6!=0) {
+		  
+		  
+		   
+		  System.out.println(opcionEtp6);
+	      EnvioDatosCliente(mensajesRecibidosSinEspacios);
+	      
+	  }
+    
+     }
+     
+
+
+public void TomaDatosCliente(envioDatos envio) {
+	
+	
+	  switch (Datos) {
+	    case  DIRECCION:
+	    	String direccion= "INGRESA LA DIRECION DE ENVIO "+ "\n";
+      	 //ESCRIBIMOS EL MENSAJE
+         	message.setText(direccion);
+             try {
+     			execute(message);
+     
+     		} catch (TelegramApiException e) {
+     			// TODO Auto-generated catch block
+     			e.printStackTrace();
+     		}
+            
+	        break;
+	    case TELEFONO:
+	    	String telefono= "INGRESA UN NUMERO DE CONTACTO "+ "\n";
+	      	 //ESCRIBIMOS EL MENSAJE
+	         	message.setText(telefono);
+	             try {
+	     			execute(message);
+	     
+	     		} catch (TelegramApiException e) {
+	     			// TODO Auto-generated catch block
+	     			e.printStackTrace();
+	     		}
+	        break;
+	    case OBSERVACION:
+	    	String observacion= "INGRESA ALGUNA NOTA SOBRE TU PEDIDO O DATOS "+ "\n";
+	      	 //ESCRIBIMOS EL MENSAJE
+	         	message.setText(observacion);
+	             try {
+	     			execute(message);
+	     
+	     		} catch (TelegramApiException e) {
+	     			// TODO Auto-generated catch block
+	     			e.printStackTrace();
+	     		} 
+	        break;
+	    case FINALIZAR:
+	       
+	      DatosTomaPedido(mensage);
+	      DetallesPedido(mensage); 
+	      System.out.println("estoy en finalizar 1 ");
+	        break;
+	    }
+	  
+	  etapa[usuarioSel] = 6;
+}
+
+public void EnvioDatosCliente(String mensajesRecibidosSinEspacios) {
+	 
+	  switch (Datos) {
+	    case  DIRECCION:
+	    	DatosCliente.put("direccion",mensajesRecibidosSinEspacios);
+	    	Datos= envioDatos.TELEFONO;
+	    	opcionEtp6=0;
+	    	//TomaDatosCliente(Datos);
+	        break;
+	    case TELEFONO:
+	    	DatosCliente.put("telefono",mensajesRecibidosSinEspacios);
+	    	Datos= envioDatos.OBSERVACION;
+	    	opcionEtp6=0;
+	    	
+	        
+	        break;
+	    case OBSERVACION:
+	    	DatosCliente.put("observacion",mensajesRecibidosSinEspacios);
+	    	Datos= envioDatos.FINALIZAR;
+	    	opcionEtp6=0;
+	    	
+	        break;
+	    case FINALIZAR:
+	      System.out.println("estoy en finalizar");
+	      
+	        break;
+	 }
+	etapa6();
+}
+public enum envioDatos{
+	  DIRECCION,TELEFONO,OBSERVACION,FINALIZAR
+	  
+	 
 }
 public String opcionMenu(int dia) {
     if (dia == 1) {
@@ -822,7 +953,7 @@ private void leemosDatos() {
 			 String metodo="GET";
 			 String url2="http://localhost:8080/api/v1/pedido";
 			 String metodo2="POST";
-			 long id_pedido=0;
+			 
 			 try {
 				  conn= conexionApi(url,metodo);
 				  int responsecode= conn.getResponseCode();
@@ -839,16 +970,16 @@ private void leemosDatos() {
 					  id_pedido=(((JSONObject) obj).getLong("pedido_id"));
 					 
 				     }
-				  if(id_pedido!=0) {
+				  if(id_pedido==0) {
 			
-			JSONObject obj=new JSONObject();
+		    conn= conexionApi(url2,metodo2);
 			JSONArray array=new JSONArray();
-			obj.put("chatId",mensage.getChatId());
-			obj.put("cliente",mensage.getChat().getLastName());
-			array.put(obj);
-			data= obj.toString();
+			DatosCliente.put("chatId",mensage.getChatId());
+			DatosCliente.put("cliente",mensage.getChat().getLastName());
+			array.put(DatosCliente);
+			data= DatosCliente.toString();
 			System.out.println(data);
-			conn.setRequestProperty("Content-type", "application/json");
+			conn.setRequestProperty("Content-type","application/json");
 			conn.setDoOutput(true);
 			OutputStream output= conn.getOutputStream();
 			output.write(data.getBytes());
@@ -856,7 +987,18 @@ private void leemosDatos() {
 			output.close();
 			System.out.println(conn.getResponseCode());
 		  }else {
-			  System.out.println("el pedido ya esta creado");
+			    conn= conexionApi(url2,metodo2);
+				JSONArray array=new JSONArray();
+				array.put(DatosCliente);
+				data= DatosCliente.toString();
+				System.out.println(data);
+				conn.setRequestProperty("Content-type","application/json");
+				conn.setDoOutput(true);
+				OutputStream output= conn.getOutputStream();
+				output.write(data.getBytes());
+				output.flush();
+				output.close();
+				System.out.println(conn.getResponseCode()); 
 		  }
 			 
 		} catch (Exception e) {
