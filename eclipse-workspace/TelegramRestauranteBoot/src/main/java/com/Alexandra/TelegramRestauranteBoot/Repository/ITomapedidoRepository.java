@@ -14,5 +14,4 @@ public interface ITomapedidoRepository extends JpaRepository<TomaPedidoModel,Lon
 	@Query(value= "SELECT * FROM pedido WHERE chat_id=?1",
 			nativeQuery=true)
 	public List <TomaPedidoModel> buscar(Long chat_id);
-	
 }

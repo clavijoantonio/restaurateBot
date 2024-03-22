@@ -18,9 +18,21 @@ public class TomaPedidoService {
 	
     public TomaPedidoModel insertTomaPedido (TomaPedidoModel request) {
 		
-		return repoPedido.save(request);
-		
+		return repoPedido.save(request);	
 	}
+   
+    public void actualizarPedido (TomaPedidoModel request,Long pedido_id) {
+		
+    	Optional<TomaPedidoModel> id_pedido=this.repoPedido.findById(pedido_id);
+    	
+    	TomaPedidoModel pedido= id_pedido.get();
+    	
+    	pedido.setDireccion(request.getDireccion());
+    	pedido.setObservacion(request.getObservacion());
+    	pedido.setTelefono(request.getTelefono());
+    	repoPedido.save(pedido);
+    }
+    
 	 public List<TomaPedidoModel> verPedidos() {
 		return repoPedido.findAll();
 		 

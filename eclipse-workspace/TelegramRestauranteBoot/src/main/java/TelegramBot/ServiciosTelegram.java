@@ -44,10 +44,12 @@ import com.Alexandra.TelegramRestauranteBoot.Service.TomaPedidoService;
 import com.Alexandra.TelegramRestauranteBoot.Service.informacionService;
 
 public class ServiciosTelegram extends TelegramLongPollingBot{
+	Long Id_pedidoCliente;
+	Long id_chat;
 	int opcionEtp6;
 	envioDatos Datos;
 	Update update=null;
-	long id_pedido=0;
+	long id_pedido;
 	double valorTotal;
 	double valorUnitario;
 	String valor2;
@@ -723,7 +725,7 @@ public void TomaDatosCliente(envioDatos envio) {
 	        break;
 	    case FINALIZAR:
 	       
-	      DatosTomaPedido(mensage);
+	      ActualizaDatosTomaPedido(mensage);
 	      DetallesPedido(mensage); 
 	      System.out.println("estoy en finalizar 1 ");
 	        break;
@@ -947,12 +949,12 @@ private void leemosDatos() {
   }
   
   public void DatosTomaPedido(Message mensage ) {
-  
-	  
+ 
 		     String url="http://localhost:8080/api/v1/pedido/"+mensage.getChatId();
 			 String metodo="GET";
 			 String url2="http://localhost:8080/api/v1/pedido";
 			 String metodo2="POST";
+			 
 			 
 			 try {
 				  conn= conexionApi(url,metodo);
@@ -968,9 +970,9 @@ private void leemosDatos() {
 				  JSONArray jsonArray = new JSONArray(cntJson);
 				  for(Object obj:jsonArray  ) {
 					  id_pedido=(((JSONObject) obj).getLong("pedido_id"));
-					 
+					  id_chat=(((JSONObject) obj).getLong("chat_id"));
 				     }
-				  if(id_pedido==0) {
+				  if( id_chat==null ) {
 			
 		    conn= conexionApi(url2,metodo2);
 			JSONArray array=new JSONArray();
@@ -985,21 +987,11 @@ private void leemosDatos() {
 			output.write(data.getBytes());
 			output.flush();
 			output.close();
+			respuesta.close();
 			System.out.println(conn.getResponseCode());
-		  }else {
-			    conn= conexionApi(url2,metodo2);
-				JSONArray array=new JSONArray();
-				array.put(DatosCliente);
-				data= DatosCliente.toString();
-				System.out.println(data);
-				conn.setRequestProperty("Content-type","application/json");
-				conn.setDoOutput(true);
-				OutputStream output= conn.getOutputStream();
-				output.write(data.getBytes());
-				output.flush();
-				output.close();
-				System.out.println(conn.getResponseCode()); 
-		  }
+		}else {
+             System.out.println("el pedido ya esta creado");
+            } 
 			 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -1008,6 +1000,59 @@ private void leemosDatos() {
 		
 			 
     } 
+  public void ActualizaDatosTomaPedido(Message mensage ) {
+	     
+	     String url="http://localhost:8080/api/v1/pedido/"+mensage.getChatId();
+		 String metodo="GET";
+		 
+	 
+		 try {
+			  conn= conexionApi(url,metodo);
+			  int responsecode= conn.getResponseCode();
+              
+			  InputStream respuesta= conn.getInputStream();
+			  byte[] result= respuesta.readAllBytes();
+			  String cntJson="";
+			  
+			  for(byte tmp:result ) 
+				  cntJson +=(char)tmp;
+			  
+			  JSONArray jsonArray = new JSONArray(cntJson);
+			  for(Object obj:jsonArray  ) {
+				  Id_pedidoCliente=(((JSONObject) obj).getLong("pedido_id"));
+				 
+				 //System.out.println(codigoPedido);
+			     }
+			
+			 String url3="http://localhost:8080/api/v1/pedido/"+ Id_pedidoCliente.toString();
+		     String metodo3="PUT"; 
+		     
+			  if(Id_pedidoCliente!=0) {
+		    System.out.println(Id_pedidoCliente);
+		    conn= conexionApi(url3,metodo3);
+			JSONArray array=new JSONArray();
+			array.put(DatosCliente);
+			data= DatosCliente.toString();
+			System.out.println(data);
+			conn.setRequestProperty("Content-type","application/json");
+			conn.setDoOutput(true);
+			OutputStream output= conn.getOutputStream();
+			output.write(data.getBytes());
+			output.flush();
+			output.close();
+			respuesta.close();
+			System.out.println(conn.getResponseCode()); 
+	  }else {
+		  System.out.println("no hay pedido");
+	  }
+		 
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+		 
+		 
+     } 
 	
  public void DetallesPedido(Message mensage ) {
 
@@ -1068,7 +1113,7 @@ private void leemosDatos() {
 		}
 	 return conn;
   }
-  public JSONObject valorArray(Message mensage) {
+/*  public JSONObject valorArray(Message mensage) {
 	  objPedido.put("chatId",mensage.getChatId());
 	  objPedido.put("cliente",mensage.getChat().getLastName());
 	  
@@ -1076,7 +1121,7 @@ private void leemosDatos() {
 	  
 	  DatosPedido.put(objPedido);
 	  return objPedido;
-  }
+  }*/
   //FUNCION QUE VALIDA SI LA CADENA DE TEXTO ES UN NUMERO
     public boolean isNumeric(String cadena) {
         try {
