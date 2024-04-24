@@ -4,14 +4,15 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-import TelegramBot.ServiciosTelegram;
+import TelegramBot.Bot;
+
 
 @Service
 public class TelegramService {
 
 	public TelegramService () {
 		try {
-			ServiciosTelegram service= new ServiciosTelegram();
+			Bot service= new Bot();
 			
 			TelegramBotsApi telegramBot= new TelegramBotsApi(DefaultBotSession.class);
 		    telegramBot.registerBot(service);

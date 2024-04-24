@@ -24,11 +24,13 @@ public class TomaPedidoModel {
 	private String telefono;
 	@Column(name="observacion")
 	private String observacion;
-	
-
+	@Column(name="paso")
+	private String paso;
+	@Column(name="estado")
+	private String estado;
 
 	public TomaPedidoModel(long pedido_id, long chat_id, String cliente, String direccion, String telefono,
-			String observacion) {
+			String observacion, String paso, String estado) {
 		super();
 		this.pedido_id = pedido_id;
 		this.chat_id = chat_id;
@@ -36,6 +38,8 @@ public class TomaPedidoModel {
 		this.direccion = direccion;
 		this.telefono = telefono;
 		this.observacion = observacion;
+		this.paso = paso;
+		this.estado = estado;
 	}
 
 
@@ -99,6 +103,29 @@ public class TomaPedidoModel {
 	public void setObservacion(String observacion) {
 		this.observacion = observacion;
 	}
-	
+
+
+
+	public String getPaso() {
+		return paso;
+	}
+
+
+
+	public void setPaso(String paso) {
+		this.paso = paso;
+	}
+
+
+
+	public String getEstado() {
+		return estado;
+	}
+
+
+
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}	
 	
 }

@@ -30,7 +30,9 @@ public class TomaPedidoService {
     	pedido.setDireccion(request.getDireccion());
     	pedido.setObservacion(request.getObservacion());
     	pedido.setTelefono(request.getTelefono());
-    	repoPedido.save(pedido);
+    	pedido.setPaso(request.getPaso());
+    	pedido.setEstado(request.getEstado());
+    	repoPedido.saveAndFlush(pedido);
     }
     
 	 public List<TomaPedidoModel> verPedidos() {
